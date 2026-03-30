@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상속나침반 — 올바른 상속을 위한 안내</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1a2742;
+    --navy-light: #2c3e6b;
+    --gold: #b8973a;
+    --gold-light: #d4ae52;
+    --cream: #faf8f3;
+    --cream-dark: #f0ece0;
+    --text-main: #1a2742;
+    --text-sub: #5a6280;
+    --text-muted: #8a91a8;
+    --white: #ffffff;
+    --border: #e2ddd0;
+    --success: #2d7a4f;
+    --warn: #8a5f1e;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-main);
+    background: var(--cream);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  h1,h2,h3,h4 { font-family: 'Noto Serif KR', serif; font-weight: 700; line-height: 1.4; }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--navy);
+    padding: 0 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    box-shadow: 0 2px 16px rgba(26,39,66,0.18);
+  }
+  .nav-logo {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 20px; font-weight: 700;
+    color: var(--gold-light); letter-spacing: -0.5px;
+    text-decoration: none;
+  }
+  .nav-logo span { color: #fff; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none; font-size: 14px; font-weight: 400;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--gold-light); }
+  .nav-cta {
+    background: var(--gold);
+    color: var(--navy) !important;
+    padding: 8px 18px !important;
+    border-radius: 6px;
+    font-weight: 700 !important;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--gold-light) !important; color: var(--navy) !important; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    padding: 96px 5% 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 480px; height: 480px;
+    border-radius: 50%;
+    background: rgba(184,151,58,0.08);
+  }
+  .hero::after {
+    content: '';
+    position: absolute; bottom: -120px; left: 10%;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(184,151,58,0.05);
+  }
+  .hero-inner { max-width: 680px; position: relative; z-index: 1; }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(184,151,58,0.18);
+    color: var(--gold-light);
+    border: 1px solid rgba(184,151,58,0.35);
+    border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    padding: 5px 14px; margin-bottom: 24px; letter-spacing: 0.5px;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    color: #fff; margin-bottom: 20px; line-height: 1.25;
+  }
+  .hero h1 em { color: var(--gold-light); font-style: normal; }
+  .hero p {
+    color: rgba(255,255,255,0.72);
+    font-size: 17px; margin-bottom: 36px; line-height: 1.8;
+  }
+  .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--gold);
+    color: var(--navy);
+    padding: 14px 28px; border-radius: 8px;
+    font-weight: 700; font-size: 15px;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    padding: 14px 28px; border-radius: 8px;
+    font-size: 15px; font-weight: 500;
+    text-decoration: none; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: inline-block;
+  }
+  .btn-outline:hover { border-color: var(--gold-light); background: rgba(184,151,58,0.1); }
+  .hero-stats {
+    display: flex; gap: 40px; margin-top: 56px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .hero-stat-num {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 28px; color: var(--gold-light); font-weight: 700; display: block;
+  }
+  .hero-stat-label { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+  /* SECTION SHARED */
+  section { padding: 80px 5%; }
+  .section-header { text-align: center; margin-bottom: 56px; }
+  .section-tag {
+    display: inline-block;
+    background: rgba(184,151,58,0.12);
+    color: var(--warn);
+    border-radius: 20px; font-size: 12px; font-weight: 500;
+    padding: 5px 14px; margin-bottom: 14px; letter-spacing: 0.5px;
+  }
+  .section-header h2 { font-size: clamp(24px, 3.5vw, 36px); color: var(--navy); margin-bottom: 14px; }
+  .section-header p { color: var(--text-sub); font-size: 16px; max-width: 560px; margin: 0 auto; }
+
+  /* INFO CARDS */
+  .info-section { background: var(--white); }
+  .info-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px;
+    max-width: 1100px; margin: 0 auto;
+  }
+  .info-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .info-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--gold);
+  }
+  .info-card:hover { box-shadow: 0 8px 32px rgba(26,39,66,0.10); transform: translateY(-3px); }
+  .info-card-icon {
+    width: 48px; height: 48px;
+    background: var(--navy);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 18px;
+  }
+  .info-card h3 { font-size: 18px; color: var(--navy); margin-bottom: 10px; }
+  .info-card p { font-size: 14px; color: var(--text-sub); line-height: 1.75; margin-bottom: 18px; }
+  .info-card-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag {
+    font-size: 11px; padding: 4px 10px; border-radius: 20px;
+    background: rgba(26,39,66,0.07); color: var(--text-sub); font-weight: 500;
+  }
+  .info-detail { display: none; }
+  .info-detail.open { display: block; }
+  .read-more {
+    background: none; border: none; cursor: pointer;
+    color: var(--gold); font-size: 13px; font-weight: 600;
+    padding: 0; text-decoration: underline; margin-top: 10px;
+  }
+  .detail-box {
+    background: var(--white); border-radius: 10px; padding: 16px;
+    margin-top: 14px; font-size: 13px; color: var(--text-sub);
+    border: 1px solid var(--border); line-height: 1.8;
+  }
+  .detail-box ul { padding-left: 18px; }
+  .detail-box li { margin-bottom: 6px; }
+
+  /* CALCULATOR */
+  .calc-section { background: var(--cream); }
+  .calc-wrapper {
+    max-width: 800px; margin: 0 auto;
+    background: var(--white);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 4px 32px rgba(26,39,66,0.08);
+  }
+  .calc-header {
+    background: var(--navy);
+    padding: 28px 36px;
+    color: white;
+  }
+  .calc-header h3 { font-size: 22px; margin-bottom: 6px; }
+  .calc-header p { font-size: 14px; opacity: 0.65; }
+  .calc-body { padding: 36px; }
+  .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  .form-group { display: flex; flex-direction: column; gap: 7px; }
+  .form-group label {
+    font-size: 13px; font-weight: 500; color: var(--text-sub); letter-spacing: 0.2px;
+  }
+  .form-group input, .form-group select {
+    height: 44px; border: 1px solid var(--border);
+    border-radius: 8px; padding: 0 14px;
+    font-size: 15px; color: var(--text-main);
+    background: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--gold); }
+  .calc-note {
+    background: rgba(26,39,66,0.04);
+    border-radius: 10px; padding: 14px 18px;
+    font-size: 13px; color: var(--text-sub);
+    margin-bottom: 24px;
+    border-left: 3px solid var(--gold);
+  }
+  .calc-btn {
+    width: 100%; height: 52px;
+    background: var(--navy); color: white;
+    border: none; border-radius: 10px;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: background 0.2s;
+  }
+  .calc-btn:hover { background: var(--navy-light); }
+  .calc-result {
+    display: none;
+    margin-top: 28px;
+    background: var(--navy);
+    border-radius: 14px; padding: 28px;
+  }
+  .calc-result.show { display: block; }
+  .result-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 14px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row .label { color: rgba(255,255,255,0.6); }
+  .result-row .value { color: white; font-weight: 500; }
+  .result-main {
+    text-align: center; padding: 20px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 16px;
+  }
+  .result-main .tax-label { color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 8px; }
+  .result-main .tax-value {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 36px; font-weight: 700; color: var(--gold-light);
+  }
+  .result-disclaimer {
+    font-size: 12px; color: rgba(255,255,255,0.4);
+    text-align: center; margin-top: 16px; line-height: 1.6;
+  }
+
+  /* EXPERT */
+  .expert-section { background: var(--white); }
+  .expert-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px; max-width: 1100px; margin: 0 auto 40px;
+  }
+  .expert-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+    text-align: center;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .expert-card:hover { box-shadow: 0 8px 32px rgba(26,39,66,0.10); transform: translateY(-3px); }
+  .expert-avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--navy);
+    margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 22px; font-weight: 700; color: var(--gold-light);
+  }
+  .expert-card h4 { font-size: 17px; color: var(--navy); margin-bottom: 4px; }
+  .expert-card .expert-role { font-size: 13px; color: var(--gold); margin-bottom: 8px; font-weight: 500; }
+  .expert-card .expert-spec { font-size: 13px; color: var(--text-sub); margin-bottom: 18px; line-height: 1.6; }
+  .expert-card .expert-tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 18px; }
+  .expert-btn {
+    display: block; width: 100%;
+    background: var(--navy); color: white;
+    border: none; border-radius: 8px; padding: 11px 0;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: background 0.2s;
+  }
+  .expert-btn:hover { background: var(--navy-light); }
+  .consult-banner {
+    max-width: 1100px; margin: 0 auto;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    border-radius: 16px; padding: 36px 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 20px;
+  }
+  .consult-banner h3 { font-size: 22px; color: white; margin-bottom: 8px; }
+  .consult-banner p { font-size: 14px; color: rgba(255,255,255,0.65); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); z-index: 1000;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white); border-radius: 16px;
+    padding: 36px; max-width: 480px; width: 92%;
+    position: relative;
+  }
+  .modal h3 { font-size: 20px; color: var(--navy); margin-bottom: 8px; }
+  .modal p { font-size: 14px; color: var(--text-sub); margin-bottom: 24px; }
+  .modal-form { display: flex; flex-direction: column; gap: 14px; }
+  .modal-form input, .modal-form select, .modal-form textarea {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 11px 14px; font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-main); background: var(--cream);
+    outline: none; transition: border-color 0.2s;
+    resize: vertical;
+  }
+  .modal-form input:focus, .modal-form select:focus, .modal-form textarea:focus { border-color: var(--gold); }
+  .modal-submit {
+    background: var(--navy); color: white;
+    border: none; border-radius: 8px; padding: 13px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 20px;
+    background: none; border: none; font-size: 22px;
+    cursor: pointer; color: var(--text-muted);
+    line-height: 1;
+  }
+
+  /* QNA */
+  .qna-section { background: var(--cream); }
+  .qna-wrapper { max-width: 900px; margin: 0 auto; }
+  .qna-toolbar {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .qna-search {
+    flex: 1; min-width: 200px; height: 44px;
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 0 16px; font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--white); outline: none;
+    transition: border-color 0.2s;
+  }
+  .qna-search:focus { border-color: var(--gold); }
+  .qna-filter {
+    height: 44px; border: 1px solid var(--border); border-radius: 8px;
+    padding: 0 12px; font-size: 14px; background: var(--white);
+    color: var(--text-main); font-family: 'Noto Sans KR', sans-serif; outline: none;
+  }
+  .qna-write-btn {
+    height: 44px; padding: 0 20px;
+    background: var(--navy); color: white;
+    border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    white-space: nowrap;
+  }
+  .qna-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px 24px;
+    margin-bottom: 12px;
+    transition: box-shadow 0.15s;
+    cursor: pointer;
+  }
+  .qna-item:hover { box-shadow: 0 4px 16px rgba(26,39,66,0.08); }
+  .qna-item-head {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 12px;
+  }
+  .qna-item-left { flex: 1; }
+  .qna-badge {
+    font-size: 11px; padding: 3px 10px; border-radius: 20px;
+    font-weight: 600; display: inline-block; margin-bottom: 8px;
+  }
+  .badge-answered { background: rgba(45,122,79,0.12); color: var(--success); }
+  .badge-pending { background: rgba(138,95,30,0.12); color: var(--warn); }
+  .qna-item h4 { font-size: 15px; color: var(--navy); margin-bottom: 6px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; }
+  .qna-meta { font-size: 12px; color: var(--text-muted); }
+  .qna-arrow { color: var(--text-muted); font-size: 18px; transition: transform 0.2s; }
+  .qna-answer {
+    display: none;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .qna-answer.open { display: block; }
+  .qna-answer-label {
+    font-size: 12px; font-weight: 600; color: var(--gold);
+    margin-bottom: 8px; letter-spacing: 0.3px;
+  }
+  .qna-answer p { font-size: 14px; color: var(--text-sub); line-height: 1.8; }
+
+  /* WRITE FORM */
+  .qna-write-form {
+    display: none;
+    background: var(--white);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; margin-bottom: 24px;
+  }
+  .qna-write-form.open { display: block; }
+  .qna-write-form h4 { font-size: 16px; color: var(--navy); margin-bottom: 16px; }
+  .form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+  .qna-write-form input, .qna-write-form select, .qna-write-form textarea {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--cream); color: var(--text-main); outline: none;
+    transition: border-color 0.2s;
+  }
+  .qna-write-form input:focus, .qna-write-form select:focus, .qna-write-form textarea:focus {
+    border-color: var(--gold);
+  }
+  .qna-write-form textarea { resize: vertical; min-height: 100px; }
+  .qna-write-form .form-actions { display: flex; gap: 10px; margin-top: 14px; justify-content: flex-end; }
+  .btn-cancel {
+    padding: 10px 20px; border: 1px solid var(--border); border-radius: 8px;
+    background: none; font-size: 14px; cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif; color: var(--text-sub);
+  }
+  .btn-submit {
+    padding: 10px 20px; background: var(--navy); color: white;
+    border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--navy); color: rgba(255,255,255,0.6);
+    padding: 48px 5% 32px;
+    font-size: 13px; line-height: 1.8;
+  }
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px;
+    margin-bottom: 40px;
+  }
+  .footer-brand .logo { font-family: 'Noto Serif KR', serif; font-size: 20px; color: var(--gold-light); font-weight: 700; margin-bottom: 12px; }
+  .footer-brand p { color: rgba(255,255,255,0.45); font-size: 13px; }
+  .footer-col h5 { color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+  .footer-col ul { list-style: none; }
+  .footer-col li { margin-bottom: 8px; }
+  .footer-col a { color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--gold-light); }
+  .footer-bottom {
+    max-width: 1100px; margin: 0 auto;
+    padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    font-size: 12px; color: rgba(255,255,255,0.3);
+  }
+  .disclaimer {
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px; padding: 12px 16px;
+    margin-top: 16px; max-width: 1100px; margin: 16px auto 0;
+    font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.7;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 32px; right: 32px; z-index: 2000;
+    background: var(--navy); color: white;
+    padding: 14px 22px; border-radius: 10px;
+    font-size: 14px; font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .calc-grid { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+    .hero-stats { flex-direction: column; gap: 20px; }
+    .consult-banner { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#"><span>상속</span>나침반</a>
+  <ul class="nav-links">
+    <li><a href="#info">상속 정보</a></li>
+    <li><a href="#calc">세금 계산기</a></li>
+    <li><a href="#expert">전문가 연결</a></li>
+    <li><a href="#qna">Q&amp;A</a></li>
+    <li><a href="#expert" class="nav-cta">무료 상담 신청</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">대한민국 No.1 상속 정보 플랫폼</div>
+    <h1>복잡한 상속,<br><em>올바른 방향</em>을 찾아드립니다</h1>
+    <p>상속세 계산부터 재산 분배, 전문가 연결까지 — 상속나침반이 처음부터 끝까지 함께합니다.</p>
+    <div class="hero-btns">
+      <a href="#calc" class="btn-primary">상속세 바로 계산하기</a>
+      <a href="#info" class="btn-outline">상속 정보 알아보기</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <span class="hero-stat-num">12,000+</span>
+        <div class="hero-stat-label">누적 상담 건수</div>
+      </div>
+      <div>
+        <span class="hero-stat-num">98%</span>
+        <div class="hero-stat-label">고객 만족도</div>
+      </div>
+      <div>
+        <span class="hero-stat-num">50+</span>
+        <div class="hero-stat-label">연계 전문가</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INFO -->
+<section class="info-section" id="info">
+  <div class="section-header">
+    <div class="section-tag">상속 핵심 정보</div>
+    <h2>꼭 알아야 할 상속 지식</h2>
+    <p>복잡한 상속 절차와 법률을 쉽고 명확하게 안내해드립니다.</p>
+  </div>
+  <div class="info-grid">
+
+    <div class="info-card">
+      <div class="info-card-icon">⚖️</div>
+      <h3>법정상속 순위와 비율</h3>
+      <p>민법에서 정한 상속인 순위와 각각의 법정 상속 비율을 이해하면 분쟁을 예방할 수 있습니다.</p>
+      <div class="info-card-tags">
+        <span class="tag">민법 제1000조</span>
+        <span class="tag">상속 순위</span>
+      </div>
+      <button class="read-more" onclick="toggleDetail('d1', this)">자세히 보기 ▾</button>
+      <div class="info-detail" id="d1">
+        <div class="detail-box">
+          <ul>
+            <li><strong>1순위:</strong> 직계비속(자녀, 손자녀) + 배우자 — 동순위 시 균등 분배, 배우자는 50% 가산</li>
+            <li><strong>2순위:</strong> 직계존속(부모, 조부모) + 배우자 — 1순위 없을 때</li>
+            <li><strong>3순위:</strong> 형제자매</li>
+            <li><strong>4순위:</strong> 4촌 이내 방계혈족</li>
+            <li>배우자는 1~2순위와 공동상속, 단독 시 단독 상속인</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-icon">📋</div>
+      <h3>상속 신고 기한과 절차</h3>
+      <p>상속 개시일(사망일)로부터 6개월 이내에 신고해야 합니다. 기한을 넘기면 가산세가 부과됩니다.</p>
+      <div class="info-card-tags">
+        <span class="tag">6개월 이내</span>
+        <span class="tag">국세청 신고</span>
+      </div>
+      <button class="read-more" onclick="toggleDetail('d2', this)">자세히 보기 ▾</button>
+      <div class="info-detail" id="d2">
+        <div class="detail-box">
+          <ul>
+            <li>신고기한: 사망일이 속하는 달의 말일부터 6개월 (해외 거주 시 9개월)</li>
+            <li>신고서류: 상속세 과세표준 신고서, 재산 목록, 채무 증명 서류 등</li>
+            <li>무신고 가산세: 납부세액의 20%, 부정신고 시 40%</li>
+            <li>납부기한 경과 시 1일 0.022% 납부지연 가산세 발생</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-icon">🏠</div>
+      <h3>상속 재산의 범위</h3>
+      <p>피상속인이 사망 당시 보유한 모든 재산과 채무가 상속 대상입니다. 사전증여도 포함됩니다.</p>
+      <div class="info-card-tags">
+        <span class="tag">부동산</span>
+        <span class="tag">금융자산</span>
+        <span class="tag">사전증여</span>
+      </div>
+      <button class="read-more" onclick="toggleDetail('d3', this)">자세히 보기 ▾</button>
+      <div class="info-detail" id="d3">
+        <div class="detail-box">
+          <ul>
+            <li>적극재산: 부동산, 금융자산, 주식, 차량, 골프 회원권 등</li>
+            <li>소극재산: 채무, 미납 세금, 공과금</li>
+            <li>사전증여: 상속인에게 10년 이내, 비상속인에게 5년 이내 증여분은 상속재산에 합산</li>
+            <li>생명보험금, 퇴직금도 간주 상속재산으로 과세 대상</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-icon">🛡️</div>
+      <h3>상속 포기와 한정승인</h3>
+      <p>빚이 재산보다 많을 때는 상속 포기 또는 한정승인을 통해 채무를 제한할 수 있습니다.</p>
+      <div class="info-card-tags">
+        <span class="tag">3개월 이내</span>
+        <span class="tag">가정법원</span>
+      </div>
+      <button class="read-more" onclick="toggleDetail('d4', this)">자세히 보기 ▾</button>
+      <div class="info-detail" id="d4">
+        <div class="detail-box">
+          <ul>
+            <li><strong>상속 포기:</strong> 상속 개시 사실을 안 날로부터 3개월 이내, 가정법원에 신고</li>
+            <li><strong>한정승인:</strong> 상속받은 재산 한도 내에서만 채무 변제 — 재산 목록 제출 필요</li>
+            <li>단순승인: 3개월 내 아무런 조치 없으면 자동으로 단순승인 처리</li>
+            <li>미성년 상속인의 경우 법정대리인이 신청 가능</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-icon">💰</div>
+      <h3>상속세 공제 항목</h3>
+      <p>기초공제, 인적공제, 배우자 공제 등 다양한 공제를 활용하면 세 부담을 크게 줄일 수 있습니다.</p>
+      <div class="info-card-tags">
+        <span class="tag">기초공제 2억</span>
+        <span class="tag">배우자 공제</span>
+      </div>
+      <button class="read-more" onclick="toggleDetail('d5', this)">자세히 보기 ▾</button>
+      <div class="info-detail" id="d5">
+        <div class="detail-box">
+          <ul>
+            <li><strong>기초공제:</strong> 2억 원</li>
+            <li><strong>인적공제:</strong> 자녀 1인당 5,000만 원, 미성년자·노인·장애인 추가</li>
+            <li><strong>일괄공제:</strong> 인적공제 합계와 5억 원 중 큰 금액 선택 가능</li>
+            <li><strong>배우자 공제:</strong> 최소 5억 원 ~ 최대 30억 원 (법정상속분 범위 내)</li>
+            <li><strong>금융재산 공제:</strong> 금융재산의 20% (최대 2억 원)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-icon">📜</div>
+      <h3>유언장 작성과 효력</h3>
+      <p>유언장이 있으면 법정상속 대신 유언에 따라 재산을 분배할 수 있습니다. 형식 요건이 중요합니다.</p>
+      <div class="info-card-tags">
+        <span class="tag">자필증서</span>
+        <span class="tag">공정증서</span>
+        <span class="tag">유류분</span>
+      </div>
+      <button class="read-more" onclick="toggleDetail('d6', this)">자세히 보기 ▾</button>
+      <div class="info-detail" id="d6">
+        <div class="detail-box">
+          <ul>
+            <li><strong>자필증서 유언:</strong> 전문, 날짜, 주소, 성명을 자필로 작성 후 날인</li>
+            <li><strong>공정증서 유언:</strong> 공증인 앞에서 2명의 증인 참석하에 작성 — 가장 안전</li>
+            <li><strong>유류분:</strong> 직계비속·배우자는 법정상속분의 1/2, 직계존속·형제자매는 1/3 보장</li>
+            <li>유류분 반환 청구: 사실을 안 날로부터 1년, 상속 개시로부터 10년 이내</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CALCULATOR -->
+<section class="calc-section" id="calc">
+  <div class="section-header">
+    <div class="section-tag">상속세 간편 계산기</div>
+    <h2>상속세를 미리 계산해보세요</h2>
+    <p>기본 정보만 입력하면 예상 상속세를 즉시 확인할 수 있습니다.</p>
+  </div>
+  <div class="calc-wrapper">
+    <div class="calc-header">
+      <h3>상속세 간이 계산기</h3>
+      <p>세법에 따른 공제 적용 후 예상 세액을 계산합니다.</p>
+    </div>
+    <div class="calc-body">
+      <div class="calc-grid">
+        <div class="form-group">
+          <label>총 상속재산 (만 원)</label>
+          <input type="number" id="totalAsset" placeholder="예: 200000" min="0">
+        </div>
+        <div class="form-group">
+          <label>채무 및 장례비용 (만 원)</label>
+          <input type="number" id="debts" placeholder="예: 5000" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label>배우자 생존 여부</label>
+          <select id="hasSpouse">
+            <option value="yes">있음</option>
+            <option value="no">없음</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>자녀 수</label>
+          <input type="number" id="children" placeholder="예: 2" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label>배우자 실제 상속액 (만 원)</label>
+          <input type="number" id="spouseAmount" placeholder="배우자 상속분" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label>금융재산 (만 원)</label>
+          <input type="number" id="financial" placeholder="예: 30000" min="0" value="0">
+        </div>
+      </div>
+      <div class="calc-note">
+        ⓘ 본 계산기는 간이 계산 도구입니다. 실제 세액은 세무사와 상담 후 신고하시기 바랍니다.
+      </div>
+      <button class="calc-btn" onclick="calcTax()">상속세 계산하기</button>
+      <div class="calc-result" id="calcResult">
+        <div class="result-main">
+          <div class="tax-label">예상 납부 상속세</div>
+          <div class="tax-value" id="resultTax">0 원</div>
+        </div>
+        <div id="resultRows"></div>
+        <div class="result-disclaimer">
+          * 이 결과는 주요 공제 항목만 반영한 간이 계산치입니다.<br>
+          실제 세액은 전문 세무사 검토가 필요합니다.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERT -->
+<section class="expert-section" id="expert">
+  <div class="section-header">
+    <div class="section-tag">전문가 연결</div>
+    <h2>검증된 상속 전문가를 연결해드립니다</h2>
+    <p>세무사, 변호사, 법무사 등 상속 분야 경험 풍부한 전문가들과 상담하세요.</p>
+  </div>
+  <div class="expert-grid">
+    <div class="expert-card">
+      <div class="expert-avatar">김</div>
+      <h4>김태양 세무사</h4>
+      <div class="expert-role">공인세무사 | 경력 15년</div>
+      <div class="expert-spec">상속세 신고, 재산평가, 절세 전략 수립 전문. 대형 상속 케이스 300건 이상 처리 경험.</div>
+      <div class="expert-tags">
+        <span class="tag">상속세 신고</span>
+        <span class="tag">재산평가</span>
+        <span class="tag">절세 전략</span>
+      </div>
+      <button class="expert-btn" onclick="openModal('김태양 세무사')">상담 신청하기</button>
+    </div>
+    <div class="expert-card">
+      <div class="expert-avatar">이</div>
+      <h4>이수진 변호사</h4>
+      <div class="expert-role">법학 박사 | 경력 12년</div>
+      <div class="expert-spec">유언 검인, 상속 분쟁 조정, 유류분 반환 소송 전문. 대형 로펌 출신 상속 소송 전문가.</div>
+      <div class="expert-tags">
+        <span class="tag">상속 분쟁</span>
+        <span class="tag">유류분</span>
+        <span class="tag">유언 검인</span>
+      </div>
+      <button class="expert-btn" onclick="openModal('이수진 변호사')">상담 신청하기</button>
+    </div>
+    <div class="expert-card">
+      <div class="expert-avatar">박</div>
+      <h4>박현우 법무사</h4>
+      <div class="expert-role">법무사 | 경력 18년</div>
+      <div class="expert-spec">상속 등기, 재산 이전, 한정승인·포기 신청 절차 전문. 신속하고 정확한 서류 처리.</div>
+      <div class="expert-tags">
+        <span class="tag">상속 등기</span>
+        <span class="tag">한정승인</span>
+        <span class="tag">재산이전</span>
+      </div>
+      <button class="expert-btn" onclick="openModal('박현우 법무사')">상담 신청하기</button>
+    </div>
+    <div class="expert-card">
+      <div class="expert-avatar">최</div>
+      <h4>최지은 세무사</h4>
+      <div class="expert-role">공인세무사 | 경력 9년</div>
+      <div class="expert-spec">증여세·상속세 통합 설계, 가업승계, 부동산 상속 전문. 기업 오너 패밀리 자산관리 다수.</div>
+      <div class="expert-tags">
+        <span class="tag">가업승계</span>
+        <span class="tag">증여 설계</span>
+        <span class="tag">부동산</span>
+      </div>
+      <button class="expert-btn" onclick="openModal('최지은 세무사')">상담 신청하기</button>
+    </div>
+  </div>
+  <div class="consult-banner">
+    <div>
+      <h3>어떤 전문가가 맞는지 모르겠다면?</h3>
+      <p>무료 매칭 서비스를 이용해보세요. 상황에 맞는 전문가를 찾아드립니다.</p>
+    </div>
+    <button class="btn-primary" onclick="openModal('전문가 매칭 서비스')">무료 전문가 매칭 신청</button>
+  </div>
+</section>
+
+<!-- QNA -->
+<section class="qna-section" id="qna">
+  <div class="section-header">
+    <div class="section-tag">Q&amp;A 게시판</div>
+    <h2>궁금한 점을 질문해보세요</h2>
+    <p>자주 묻는 상속 관련 질문과 전문가 답변을 확인하세요.</p>
+  </div>
+  <div class="qna-wrapper">
+    <div class="qna-toolbar">
+      <input type="text" class="qna-search" placeholder="질문 검색..." id="qnaSearch" oninput="filterQna()">
+      <select class="qna-filter" id="qnaFilter" onchange="filterQna()">
+        <option value="all">전체</option>
+        <option value="answered">답변완료</option>
+        <option value="pending">답변대기</option>
+      </select>
+      <button class="qna-write-btn" onclick="toggleWriteForm()">+ 질문하기</button>
+    </div>
+
+    <div class="qna-write-form" id="writeForm">
+      <h4>질문 작성</h4>
+      <div class="form-row">
+        <input type="text" id="newNick" placeholder="닉네임 (예: 서울시민)" style="max-width: 160px;">
+        <select id="newCategory" style="max-width: 160px;">
+          <option>상속 순위</option>
+          <option>상속세</option>
+          <option>상속 포기</option>
+          <option>유언장</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <input type="text" id="newTitle" placeholder="질문 제목을 입력해주세요" style="margin-bottom: 10px;">
+      <textarea id="newContent" placeholder="질문 내용을 자세히 적어주세요..."></textarea>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="toggleWriteForm()">취소</button>
+        <button class="btn-submit" onclick="submitQna()">등록하기</button>
+      </div>
+    </div>
+
+    <div id="qnaList"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">상속나침반</div>
+      <p>대한민국 상속 정보의 기준<br>올바른 상속을 위한 가장 믿을 수 있는 파트너</p>
+    </div>
+    <div class="footer-col">
+      <h5>서비스</h5>
+      <ul>
+        <li><a href="#info">상속 정보</a></li>
+        <li><a href="#calc">세금 계산기</a></li>
+        <li><a href="#expert">전문가 연결</a></li>
+        <li><a href="#qna">Q&amp;A</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>상속 유형</h5>
+      <ul>
+        <li><a href="#">부동산 상속</a></li>
+        <li><a href="#">금융자산 상속</a></li>
+        <li><a href="#">가업 승계</a></li>
+        <li><a href="#">해외 자산 상속</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>회사</h5>
+      <ul>
+        <li><a href="#">소개</a></li>
+        <li><a href="#">이용약관</a></li>
+        <li><a href="#">개인정보처리방침</a></li>
+        <li><a href="#">문의하기</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 상속나침반. All rights reserved.</span>
+    <span>사업자등록번호: 000-00-00000 | 서울특별시 강남구</span>
+  </div>
+  <div class="disclaimer">
+    본 사이트에서 제공하는 모든 정보는 일반적인 법률·세무 정보 제공 목적으로만 활용되며, 법률자문 또는 세무자문에 해당하지 않습니다.
+    구체적인 상속 관련 의사결정은 반드시 자격을 갖춘 전문가의 조언을 받으시기 바랍니다.
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle">상담 신청</h3>
+    <p id="modalDesc">전문가 연결을 위해 아래 정보를 입력해주세요. 영업일 기준 1일 이내 연락드립니다.</p>
+    <div class="modal-form">
+      <input type="text" placeholder="이름" id="mName">
+      <input type="tel" placeholder="연락처 (010-0000-0000)" id="mPhone">
+      <input type="email" placeholder="이메일" id="mEmail">
+      <select id="mType">
+        <option>상속세 신고 도움 필요</option>
+        <option>상속 분쟁 해결</option>
+        <option>유언장 작성</option>
+        <option>상속 포기 / 한정승인</option>
+        <option>상속 등기</option>
+        <option>기타 상담</option>
+      </select>
+      <textarea placeholder="상담 내용을 간단히 적어주세요..." rows="3" id="mContent"></textarea>
+      <button class="modal-submit" onclick="submitModal()">상담 신청 완료</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const qnaData = [
+  {
+    id: 1, status: 'answered',
+    nick: '서울 거주자', category: '상속세',
+    title: '아버지가 돌아가셨는데 재산이 10억이면 상속세가 얼마나 되나요?',
+    date: '2025.01.15',
+    answer: '배우자와 자녀 2명 기준으로 배우자 공제(최소 5억) + 일괄공제(5억) 적용 시 과세표준이 0원이 될 수 있습니다. 다만 실제 배우자 상속분과 금융재산 등에 따라 달라지므로 정확한 계산기를 활용하거나 세무사 상담을 권장드립니다.'
+  },
+  {
+    id: 2, status: 'answered',
+    nick: '부산 가족',  category: '상속 포기',
+    title: '빚이 재산보다 많은 경우 상속 포기는 어떻게 하나요?',
+    date: '2025.01.20',
+    answer: '상속 개시를 안 날(사망일)로부터 3개월 이내에 피상속인의 마지막 주소지 관할 가정법원에 상속 포기 신고를 하면 됩니다. 신청서와 가족관계증명서 등 서류를 제출하시면 됩니다. 자녀가 모두 포기하면 다음 순위(부모)로 상속이 넘어가므로 가족 전체가 협의해야 합니다.'
+  },
+  {
+    id: 3, status: 'answered',
+    nick: '대구 주민', category: '유언장',
+    title: '자필 유언장을 작성했는데 법적 효력이 있나요?',
+    date: '2025.01.28',
+    answer: '자필증서 유언이 유효하려면 ① 전문(全文)을 본인이 직접 자필로 작성, ② 작성 연월일 명기, ③ 주소 자필 기재, ④ 성명 자필 서명, ⑤ 날인(도장 또는 무인)의 5가지 요건을 모두 갖춰야 합니다. 하나라도 빠지면 무효가 될 수 있으니, 가장 안전한 방법은 공정증서 유언을 추천드립니다.'
+  },
+  {
+    id: 4, status: 'pending',
+    nick: '인천 거주', category: '상속 순위',
+    title: '이혼한 전 배우자 사이의 자녀도 상속을 받을 수 있나요?',
+    date: '2025.02.03',
+    answer: ''
+  },
+  {
+    id: 5, status: 'answered',
+    nick: '경기도민', category: '상속세',
+    title: '10년 전에 부모님께 증여받은 재산도 상속세에 포함되나요?',
+    date: '2025.02.10',
+    answer: '상속인에게 증여된 재산은 상속 개시일로부터 소급하여 10년 이내의 것이 상속재산에 합산됩니다. 따라서 10년 이전에 증여받은 재산은 원칙적으로 상속재산에 합산되지 않습니다. 단, 이미 납부한 증여세는 공제됩니다.'
+  },
+];
+
+let qnaList = [...qnaData];
+
+function renderQna(data) {
+  const container = document.getElementById('qnaList');
+  if (!data.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">검색 결과가 없습니다.</div>';
+    return;
+  }
+  container.innerHTML = data.map(q => `
+    <div class="qna-item" onclick="toggleQna(${q.id})">
+      <div class="qna-item-head">
+        <div class="qna-item-left">
+          <span class="qna-badge ${q.status === 'answered' ? 'badge-answered' : 'badge-pending'}">
+            ${q.status === 'answered' ? '✓ 답변완료' : '⏳ 답변대기'}
+          </span>
+          <h4>${q.title}</h4>
+          <div class="qna-meta">${q.nick} · ${q.category} · ${q.date}</div>
+        </div>
+        <span class="qna-arrow" id="arrow-${q.id}">›</span>
+      </div>
+      <div class="qna-answer" id="ans-${q.id}">
+        ${q.status === 'answered' ? `
+          <div class="qna-answer-label">전문가 답변</div>
+          <p>${q.answer}</p>
+        ` : `<p style="color:var(--text-muted);font-size:14px;">전문가 검토 중입니다. 빠른 시일 내에 답변드리겠습니다.</p>`}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleQna(id) {
+  const ans = document.getElementById('ans-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  const isOpen = ans.classList.toggle('open');
+  arrow.style.transform = isOpen ? 'rotate(90deg)' : '';
+}
+
+function filterQna() {
+  const search = document.getElementById('qnaSearch').value.toLowerCase();
+  const filter = document.getElementById('qnaFilter').value;
+  const filtered = qnaList.filter(q => {
+    const matchText = q.title.includes(search) || q.category.includes(search);
+    const matchFilter = filter === 'all' || q.status === filter;
+    return matchText && matchFilter;
+  });
+  renderQna(filtered);
+}
+
+function toggleWriteForm() {
+  const form = document.getElementById('writeForm');
+  form.classList.toggle('open');
+}
+
+function submitQna() {
+  const nick = document.getElementById('newNick').value.trim() || '익명';
+  const title = document.getElementById('newTitle').value.trim();
+  const category = document.getElementById('newCategory').value;
+  if (!title) { showToast('질문 제목을 입력해주세요.'); return; }
+  const now = new Date();
+  const date = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  qnaList.unshift({ id: Date.now(), status: 'pending', nick, category, title, date, answer: '' });
+  document.getElementById('newNick').value = '';
+  document.getElementById('newTitle').value = '';
+  document.getElementById('newContent').value = '';
+  toggleWriteForm();
+  filterQna();
+  showToast('질문이 등록되었습니다! 전문가 답변을 기다려주세요.');
+}
+
+function toggleDetail(id, btn) {
+  const el = document.getElementById(id);
+  const isOpen = el.classList.toggle('open');
+  btn.textContent = isOpen ? '접기 ▴' : '자세히 보기 ▾';
+}
+
+function calcTax() {
+  const total = parseFloat(document.getElementById('totalAsset').value) || 0;
+  const debt = parseFloat(document.getElementById('debts').value) || 0;
+  const hasSpouse = document.getElementById('hasSpouse').value === 'yes';
+  const children = parseInt(document.getElementById('children').value) || 0;
+  const spouseAmt = parseFloat(document.getElementById('spouseAmount').value) || 0;
+  const financial = parseFloat(document.getElementById('financial').value) || 0;
+
+  if (!total) { showToast('총 상속재산을 입력해주세요.'); return; }
+
+  const netAsset = total - debt;
+  let deduction = 0;
+
+  // 기초공제 2억
+  deduction += 20000;
+  // 자녀 인적공제 (1인당 5,000만)
+  deduction += children * 5000;
+  // 일괄공제: 인적 합계와 5억 중 큰 것 (기초공제 제외한 비교)
+  const personalDeduct = 20000 + children * 5000;
+  const lumpDeduct = 50000;
+  if (lumpDeduct > personalDeduct) { deduction = 50000; }
+
+  // 배우자 공제 (최소 5억, 최대 30억)
+  if (hasSpouse) {
+    const spouseDeduct = Math.min(Math.max(spouseAmt, 50000), 300000);
+    deduction += spouseDeduct;
+  }
+
+  // 금융재산 공제 20% (최대 2억)
+  const finDeduct = Math.min(financial * 0.2, 20000);
+  deduction += finDeduct;
+
+  const taxBase = Math.max(netAsset - deduction, 0);
+
+  // 상속세 세율 (누진)
+  let tax = 0;
+  if (taxBase <= 10000) tax = taxBase * 0.1;
+  else if (taxBase <= 50000) tax = 1000 + (taxBase - 10000) * 0.2;
+  else if (taxBase <= 100000) tax = 9000 + (taxBase - 50000) * 0.3;
+  else if (taxBase <= 300000) tax = 24000 + (taxBase - 100000) * 0.4;
+  else tax = 104000 + (taxBase - 300000) * 0.5;
+
+  const result = document.getElementById('calcResult');
+  const taxEl = document.getElementById('resultTax');
+  const rowsEl = document.getElementById('resultRows');
+
+  taxEl.textContent = Math.round(tax).toLocaleString() + ' 만 원';
+  rowsEl.innerHTML = `
+    <div class="result-row"><span class="label">총 상속재산</span><span class="value">${total.toLocaleString()} 만 원</span></div>
+    <div class="result-row"><span class="label">(-) 채무·장례비</span><span class="value">${debt.toLocaleString()} 만 원</span></div>
+    <div class="result-row"><span class="label">순 상속재산</span><span class="value">${Math.round(netAsset).toLocaleString()} 만 원</span></div>
+    <div class="result-row"><span class="label">(-) 각종 공제</span><span class="value">${Math.round(deduction).toLocaleString()} 만 원</span></div>
+    <div class="result-row"><span class="label">과세표준</span><span class="value">${Math.round(taxBase).toLocaleString()} 만 원</span></div>
+  `;
+
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function openModal(name) {
+  document.getElementById('modalTitle').textContent = name + ' 상담 신청';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+function submitModal() {
+  const name = document.getElementById('mName').value.trim();
+  const phone = document.getElementById('mPhone').value.trim();
+  if (!name || !phone) { showToast('이름과 연락처를 입력해주세요.'); return; }
+  closeModal();
+  showToast('상담 신청이 완료되었습니다! 영업일 1일 이내 연락드립니다. 😊');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+renderQna(qnaList);
+</script>
+</body>
+</html>
